@@ -2,7 +2,6 @@ from moviepy.editor import AudioFileClip
 from moviepy.editor import VideoFileClip
 from moviepy.editor import concatenate_videoclips
 from pydub import AudioSegment
-# import noisereduce as nr
 import numpy as np
 from googletrans import Translator
 import os
@@ -55,38 +54,6 @@ def adjust_volume(input_file, output_file, volume_factor):
 
     # Export the adjusted audio to a file
     adjusted_audio.export(output_file, format="mp3")
-
-
-# def clean_background_noise(input_file, output_file):
-#     # Load the audio file
-#     audio = AudioSegment.from_file(input_file)
-
-#     # Convert the audio to a numpy array
-#     audio_array = audio.get_array_of_samples()
-
-#     # Perform background noise reduction
-#     reduced_audio = nr.reduce_noise(y=audio_array, sr=audio.frame_rate)
-
-#     # Create a new AudioSegment from the reduced audio numpy array
-#     cleaned_audio = audio._spawn(reduced_audio)
-
-#     # Export the cleaned audio to a file
-#     cleaned_audio.export(output_file, format="mp3")
-
-# def calculate_average_decibels(input_file, reference_level=0.0):
-#     # Load the audio file
-#     audio = AudioSegment.from_file(input_file)
-
-#     # Convert the audio to a numpy array
-#     audio_array = np.array(audio.get_array_of_samples())
-
-#     # Calculate the RMS of the audio signal
-#     rms = np.sqrt(np.mean(np.square(audio_array)))
-
-#     # Convert RMS to decibels (dB)
-#     decibels = 20 * np.log10(rms) + reference_level
-
-#     return decibels
 
 
 def translate_japanese_to_chinese(text):
