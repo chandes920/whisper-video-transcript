@@ -1,7 +1,6 @@
 from moviepy.editor import AudioFileClip
 from moviepy.editor import VideoFileClip
 from moviepy.editor import concatenate_videoclips
-from pydub import AudioSegment
 import numpy as np
 from googletrans import Translator
 import os
@@ -43,17 +42,6 @@ def split_mp4(input_file, start, end, output_file):
 
     # Write the two parts to separate video files
     part.write_videofile(output_file, codec='libx264', audio_codec="aac")
-
-
-def adjust_volume(input_file, output_file, volume_factor):
-    # Load the audio file
-    audio = AudioSegment.from_file(input_file)
-
-    # Adjust the volume by the specified factor
-    adjusted_audio = audio + volume_factor
-
-    # Export the adjusted audio to a file
-    adjusted_audio.export(output_file, format="mp3")
 
 
 def translate_japanese_to_chinese(text):
