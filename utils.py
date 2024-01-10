@@ -1,3 +1,4 @@
+import cv2
 from moviepy.editor import AudioFileClip
 from moviepy.editor import VideoFileClip
 from moviepy.editor import concatenate_videoclips
@@ -95,3 +96,38 @@ def load_pkl(file_path):
 def write_pkl(object, file_path):
     with open(file_path, 'wb') as f:
         pickle.dump(object, f)
+
+def check_starting_folder(filepaths):
+    # Check if the list is not empty
+    if not filepaths:
+        print("List of file paths is empty.")
+        return False
+    
+    # Get the directory part of each file path
+    dirnames = [os.path.dirname(path) for path in filepaths]
+
+    # Get the common prefix of all file paths
+    common_prefix = os.path.commonprefix(dirnames)
+
+    # Check if the common prefix ends with a directory separator (indicating a folder)
+    is_same_folder = common_prefix and common_prefix[-1] == os.path.sep
+
+    return is_same_folder, common_prefix
+
+def get_video_resolution(video_path):
+    # Open the video file
+    cap = cv2.VideoCapture(video_path)
+
+    # Check if the video file is opened successfully
+    if not cap.isOpened():
+        print("Error: Could not open video file.")
+        return None
+
+    # Get the width and height of the video frames
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+    # Release the video capture object
+    cap.release()
+
+    return width, height
