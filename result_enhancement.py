@@ -19,7 +19,8 @@ from result_enhancement_utils import (
     top_consecutive_occurrences,
     extract_mp4_each_consecutive_text,
     update_timestamp_enhance_result,
-    drop_enhancement_original_index
+    drop_enhancement_original_index,
+    delete_working_files
 )
 
 
@@ -94,3 +95,6 @@ class ResultEnhancement:
             codec="libx264",
             audio_codec="aac",
         )
+
+    def delete_count_dict_mp4(self, video_list):
+        delete_working_files(video_list)

@@ -18,7 +18,6 @@ from utils import (
     split_mp4,
     combine_outputs,
     create_working_dir,
-    delete_working_files,
     load_pkl,
     write_pkl,
     check_starting_folder,

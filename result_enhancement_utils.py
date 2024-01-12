@@ -1,4 +1,5 @@
 from moviepy.video.io.VideoFileClip import VideoFileClip
+import os
 
 def top_consecutive_occurrences(series, threshold=5):
     count_dict = {}
@@ -55,5 +56,10 @@ def drop_enhancement_original_index(count_dict, result_df):
         dropped_result_df = dropped_result_df[mask]
     return dropped_result_df
 
-
+def delete_working_files(video_list):
+    for video in video_list:
+        os.remove(video)
+        print(f"File '{video}' has been successfully deleted.")
+    else:
+        print(f"File '{video}' does not exist.")
 

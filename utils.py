@@ -75,19 +75,6 @@ def create_working_dir(folder_name, file_name):
     # Move the file to the new folder
     shutil.move(file_name, os.path.join(folder_name, file_name))
 
-def delete_working_files(file_path):
-
-    # Specify the file path
-    file_path = file_path
-
-    # Check if the file exists
-    if os.path.exists(file_path):
-        # Remove the file
-        os.remove(file_path)
-        print(f"File '{file_path}' has been successfully deleted.")
-    else:
-        print(f"File '{file_path}' does not exist.")
-
 def load_pkl(file_path):
     with open(file_path, 'rb') as f:
         object = pickle.load(f)
