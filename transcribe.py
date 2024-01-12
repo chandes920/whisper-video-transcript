@@ -18,6 +18,10 @@ from utils import (
     split_mp4,
     combine_outputs,
     create_working_dir,
+<<<<<<< HEAD
+=======
+    # delete_working_files,
+>>>>>>> d1fb8b03902e07c9bb167336b6e921ded200c708
     load_pkl,
     write_pkl,
     check_starting_folder,
