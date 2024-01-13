@@ -11,7 +11,7 @@
 ## Example Usage for Transcription
 
 ```python
-from transcribe import OpenAIWhisperTranscription
+from whisper_video_transcript.transcribe.openai_whisper_transcription import OpenAIWhisperTranscription
 
 whisper_transcription = OpenAIWhisperTranscription(
     mp4_name="your_mp4_name.mp4"
@@ -27,7 +27,7 @@ whisper_transcription.add_subs_to_video(subs_dict)
 ## Example Usage for Result Enhancement
 
 ```python
-from result_enhancement import ResultEnhancement
+from whisper_video_transcript.result_enhancement.result_enhancement import ResultEnhancement
 
 for video in whisper_transcription.video_list:
     result_enhancement = ResultEnhancement(result_dict[video])
