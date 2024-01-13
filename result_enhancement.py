@@ -17,7 +17,7 @@ logging.getLogger("faster_whisper").setLevel(logging.DEBUG)
 
 from result_enhancement_utils import (
     top_consecutive_occurrences,
-    extract_mp4_each_consecutive_text,
+    extract_mp4_clips,
     update_timestamp_enhance_result,
     drop_enhancement_original_index,
     delete_working_files
@@ -27,16 +27,16 @@ from result_enhancement_utils import (
 class ResultEnhancement:
     def __init__(
         self,
-        result_dict
+        result_df
     ):
-        self.result_dict = result_dict
+        self.result_df = result_df
 
-    def create_count_dict_consecutive_occurrences(self, threshold=5):
-        count_dict = top_consecutive_occurrences(self.result_dict['text'], threshold)
-        return count_dict
+    def create_index_dict_consecutive_occurrences(self, threshold=5):
+        index_dict = top_consecutive_occurrences(self.result_df['text'], threshold)
+        return index_dict
     
-    def extract_mp4_each_consecutive_text(self, video_file_path, count_dict):
-        enhance_video_list = extract_mp4_each_consecutive_text(video_file_path, count_dict, self.result_dict)
+    def extract_mp4_clips(self, video_file_path, index_dict):
+        enhance_video_list = extract_mp4_clips(video_file_path, index_dict, self.result_df)
         self.enhance_video_list = enhance_video_list
         return self.enhance_video_list
     
@@ -48,9 +48,9 @@ class ResultEnhancement:
         enhance_result_dict = whisper_transcription.openai_transcribe_to_df()
         return enhance_result_dict
 
-    def create_final_result_dict(self, enhance_result_dict, count_dict, result_dict):
-        updated_timestamp_enhance_result_dict = update_timestamp_enhance_result(enhance_result_dict, count_dict, result_dict)
-        dropped_result_df = drop_enhancement_original_index(count_dict, result_dict)
+    def create_final_result_dict(self, enhance_result_dict, index_dict, result_df):
+        updated_timestamp_enhance_result_dict = update_timestamp_enhance_result(enhance_result_dict, index_dict, result_df)
+        dropped_result_df = drop_enhancement_original_index(index_dict, result_df)
         enhance_video_df = [value for _, value in updated_timestamp_enhance_result_dict.items()]
         final_result_list = [dropped_result_df] + enhance_video_df
         final_result_df = pd.concat(final_result_list).sort_values(by='start').reset_index(drop=True)
@@ -96,5 +96,49 @@ class ResultEnhancement:
             audio_codec="aac",
         )
 
-    def delete_count_dict_mp4(self, video_list):
+    def delete_index_dict_mp4(self, video_list):
         delete_working_files(video_list)
+
+    def consecutive_text_workflow(self, video, consecutive_text_threshold=4, process=False, output=False):
+        index_dict = self.create_index_dict_consecutive_occurrences(threshold=consecutive_text_threshold)
+        if index_dict:
+            print(video, index_dict)
+            if process:
+                enhanced_dict = self._generic_workflow(video, index_dict, output)
+                new_index_dict = self.create_index_dict_consecutive_occurrences(threshold=consecutive_text_threshold)
+                print(video, new_index_dict)
+                return enhanced_dict
+
+    def duration_workflow(self, video, enhanced_dict, duration_threshold=10, process=False, output=False):
+        final_result_df = enhanced_dict[video]
+        final_result_df['duration'] = final_result_df['end']  - final_result_df['start']
+        final_result_df_longer_than_duration = final_result_df[final_result_df['duration'] >= duration_threshold]
+        print(final_result_df_longer_than_duration)
+        if process:
+            index_dict = {}
+
+            for index, row in final_result_df_longer_than_duration.iterrows():
+                current_value = index
+                index_dict.setdefault(current_value, {'index_range': None})
+                index_dict[current_value]['index_range'] = [index, index + 1]
+                index_dict[current_value]['cleaned_key'] = f"duration_{index}"
+
+            enhanced_dict = self._generic_workflow(video, index_dict, output)
+
+            final_result_df['duration'] = final_result_df['end']  - final_result_df['start']
+            final_result_df_longer_than_duration = final_result_df[final_result_df['duration'] >= duration_threshold]
+
+            print(final_result_df_longer_than_duration)
+            return enhanced_dict
+
+    def _generic_workflow(self, video, index_dict, output):
+        enhanced_dict = {}
+        enhance_video_list = self.extract_mp4_clips(video, index_dict)
+        whisper_transcription_enhance = self.init_whisper_transcription(enhance_video_list)
+        enhance_result_dict = self.enhance_transcribe_to_df(whisper_transcription_enhance)
+        final_result_df = self.create_final_result_dict(enhance_result_dict, index_dict, self.result_df)
+        enhanced_dict[video] = final_result_df
+        subs = self.create_enhanced_subs_dict(final_result_df)
+        if output:
+            self.add_enhanced_subs_to_video(whisper_transcription_enhance, video, subs)
+        return enhanced_dict
