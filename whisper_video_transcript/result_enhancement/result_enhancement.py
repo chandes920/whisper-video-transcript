@@ -10,7 +10,7 @@ from moviepy.video.tools.subtitles import SubtitlesClip
 import pandas as pd
 import pickle
 
-from transcribe import OpenAIWhisperTranscription
+from transcribe.openai_whisper_transcription import OpenAIWhisperTranscription
 
 logging.basicConfig()
 logging.getLogger("faster_whisper").setLevel(logging.DEBUG)
@@ -64,6 +64,37 @@ class ResultEnhancement:
             text = row["text"]
             subs.append(((start, end), text))
         return subs
+    
+    def add_enhanced_subs_to_video(
+        self,
+        whisper_transcription,
+        video_file_path: str,
+        subs: list,
+        font: str = "arial-bold",
+        fontsize: int = 40,
+        color: str = "white",
+        stroke_color: str = "black",
+        stroke_width: float = 3,
+        size: tuple = (1100, 720),
+        method: str = "caption",
+        align: str = "South"
+    ):
+        generator = lambda txt: TextClip(txt, font=font, fontsize=fontsize, color=color, stroke_color=stroke_color, stroke_width=stroke_width, size=whisper_transcription.size, method=method, align=align)
+
+        subtitles = SubtitlesClip(subs, generator)
+        video = VideoFileClip(video_file_path)
+        result = CompositeVideoClip(
+            [video, subtitles.set_pos(("center", "bottom"))]
+        )
+        output_video_file_name = video_file_path[:-4]
+        result.write_videofile(
+            f"{output_video_file_name}_output.mp4",
+            fps=video.fps,
+            temp_audiofile=f"temp-audio.m4a",
+            remove_temp=True,
+            codec="libx264",
+            audio_codec="aac",
+        )
 
     def delete_index_dict_mp4(self, video_list):
         delete_working_files(video_list)
@@ -102,7 +133,7 @@ class ResultEnhancement:
 
     def _generic_workflow(self, video, index_dict, output):
         enhanced_dict = {}
-        subs_dict = {}
+
         enhance_video_list = self.extract_mp4_clips(video, index_dict)
         whisper_transcription_enhance = self.init_whisper_transcription(enhance_video_list)
         enhance_result_dict = self.enhance_transcribe_to_df(whisper_transcription_enhance)
@@ -110,6 +141,5 @@ class ResultEnhancement:
         enhanced_dict[video] = final_result_df
         subs = self.create_enhanced_subs_dict(final_result_df)
         if output:
-            subs_dict[video] = subs
-            whisper_transcription_enhance.add_subs_to_video(video, subs_dict)
+            self.add_enhanced_subs_to_video(whisper_transcription_enhance, video, subs)
         return enhanced_dict
