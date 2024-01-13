@@ -10,12 +10,12 @@ from moviepy.video.tools.subtitles import SubtitlesClip
 import pandas as pd
 import pickle
 
-from transcribe.openai_whisper_transcription import OpenAIWhisperTranscription
+from whisper_video_transcript.transcribe.openai_whisper_transcription import OpenAIWhisperTranscription
 
 logging.basicConfig()
 logging.getLogger("faster_whisper").setLevel(logging.DEBUG)
 
-from result_enhancement.utils import (
+from whisper_video_transcript.result_enhancement.utils import (
     top_consecutive_occurrences,
     extract_mp4_clips,
     update_timestamp_enhance_result,
