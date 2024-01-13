@@ -8,7 +8,7 @@
   - `OpenAIWhisperTranscription`: Class for initiating transcription using the OpenAI Whisper model.
   - `ResultEnhancement`: Class for enhancing transcription results, offering additional functionalities.
 
-## Example Usage
+## Example Usage for Transcription
 
 ```python
 from transcribe import OpenAIWhisperTranscription
@@ -22,4 +22,16 @@ result_dict = whisper_transcription.openai_transcribe_to_df()
 subs_dict = whisper_transcription.create_subs_dict(result_dict)
 
 whisper_transcription.add_subs_to_video(subs_dict)
+```
+
+## Example Usage for Result Enhancement
+
+```python
+from result_enhancement import ResultEnhancement
+
+for video in whisper_transcription.video_list:
+    result_enhancement = ResultEnhancement(result_dict[video])
+    enhanced_dict = result_enhancement.consecutive_text_workflow(video, consecutive_text_threshold=1, process=True, output=False)
+
+    result_enhancement.duration_workflow(video, enhanced_dict, duration_threshold=4, process=True, output=True)
 ```
