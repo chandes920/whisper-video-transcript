@@ -15,7 +15,7 @@ from transcribe import OpenAIWhisperTranscription
 logging.basicConfig()
 logging.getLogger("faster_whisper").setLevel(logging.DEBUG)
 
-from result_enhancement_utils import (
+from result_enhancement.utils import (
     top_consecutive_occurrences,
     extract_mp4_clips,
     update_timestamp_enhance_result,

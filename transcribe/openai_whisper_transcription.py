@@ -13,7 +13,7 @@ import pickle
 logging.basicConfig()
 logging.getLogger("faster_whisper").setLevel(logging.DEBUG)
 
-from utils import (
+from transcribe.utils import (
     mp4_duration,
     split_mp4,
     combine_outputs,
