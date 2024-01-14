@@ -107,6 +107,7 @@ class ResultEnhancement:
                 enhanced_dict = self._generic_workflow(video, index_dict, output)
                 new_index_dict = self.create_index_dict_consecutive_occurrences(threshold=consecutive_text_threshold)
                 print(video, new_index_dict)
+                self.delete_index_dict_mp4(self.enhance_video_list)
                 return enhanced_dict
 
     def duration_workflow(self, video, enhanced_dict, duration_threshold=10, process=False, output=False):
@@ -129,6 +130,8 @@ class ResultEnhancement:
             final_result_df_longer_than_duration = final_result_df[final_result_df['duration'] >= duration_threshold]
 
             print(final_result_df_longer_than_duration)
+            
+            self.delete_index_dict_mp4(self.enhance_video_list)
             return enhanced_dict
 
     def _generic_workflow(self, video, index_dict, output):
