@@ -113,7 +113,7 @@ class ResultEnhancement:
                 self.delete_index_dict_mp4(self.enhance_video_list)
                 return enhanced_dict
             else:
-                print("Enhancements not processed.")
+                print("Enhancements for consecutive texts not processed.")
                 return enhanced_dict
                 
         else:
@@ -125,24 +125,32 @@ class ResultEnhancement:
         final_result_df['duration'] = final_result_df['end']  - final_result_df['start']
         final_result_df_longer_than_duration = final_result_df[final_result_df['duration'] >= duration_threshold]
         print(final_result_df_longer_than_duration)
-        if process:
-            index_dict = {}
 
-            for index, row in final_result_df_longer_than_duration.iterrows():
-                current_value = index
-                index_dict.setdefault(current_value, {'index_range': None})
-                index_dict[current_value]['index_range'] = [index, index + 1]
-                index_dict[current_value]['cleaned_key'] = f"duration_{index}"
+        if not final_result_df_longer_than_duration.empty:
+            if process:
+                index_dict = {}
 
-            enhanced_dict = self._generic_workflow(video, index_dict, output)
+                for index, row in final_result_df_longer_than_duration.iterrows():
+                    current_value = index
+                    index_dict.setdefault(current_value, {'index_range': None})
+                    index_dict[current_value]['index_range'] = [index, index + 1]
+                    index_dict[current_value]['cleaned_key'] = f"duration_{index}"
 
-            new_final_results_df = enhanced_dict[video]
-            new_final_results_df['duration'] = new_final_results_df['end']  - new_final_results_df['start']
-            new_final_result_df_longer_than_duration = new_final_results_df[new_final_results_df['duration'] >= duration_threshold]
+                enhanced_dict = self._generic_workflow(video, index_dict, output)
 
-            print(new_final_result_df_longer_than_duration)
-            
-            self.delete_index_dict_mp4(self.enhance_video_list)
+                new_final_results_df = enhanced_dict[video]
+                new_final_results_df['duration'] = new_final_results_df['end']  - new_final_results_df['start']
+                new_final_result_df_longer_than_duration = new_final_results_df[new_final_results_df['duration'] >= duration_threshold]
+
+                print(new_final_result_df_longer_than_duration)
+                
+                self.delete_index_dict_mp4(self.enhance_video_list)
+                return enhanced_dict
+            else:
+                print("Enhancements for duration not processed.")
+                return enhanced_dict
+        else:
+            print(f"No durations longer than {duration_threshold} seconds are found.")
             return enhanced_dict
 
     def _generic_workflow(self, video, index_dict, output):
