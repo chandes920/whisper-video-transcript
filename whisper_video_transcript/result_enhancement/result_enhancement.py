@@ -31,8 +31,8 @@ class ResultEnhancement:
     ):
         self.result_df = result_df
 
-    def create_index_dict_consecutive_occurrences(self, threshold=5):
-        index_dict = top_consecutive_occurrences(self.result_df['text'], threshold)
+    def create_index_dict_consecutive_occurrences(self, result_text = None, threshold=5):
+        index_dict = top_consecutive_occurrences(result_text if result_text else self.result_df['text'], threshold)
         return index_dict
     
     def extract_mp4_clips(self, video_file_path, index_dict):
@@ -108,7 +108,7 @@ class ResultEnhancement:
             print(video, index_dict)
             if process:
                 enhanced_dict = self._generic_workflow(video, index_dict, output)
-                new_index_dict = self.create_index_dict_consecutive_occurrences(threshold=consecutive_text_threshold)
+                new_index_dict = self.create_index_dict_consecutive_occurrences(result_text=enhanced_dict[video]['text'], threshold=consecutive_text_threshold)
                 print(video, new_index_dict)
                 self.delete_index_dict_mp4(self.enhance_video_list)
                 return enhanced_dict
