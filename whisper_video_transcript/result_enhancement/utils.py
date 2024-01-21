@@ -60,6 +60,3 @@ def delete_working_files(video_list):
     for video in video_list:
         os.remove(video)
         print(f"File '{video}' has been successfully deleted.")
-    else:
-        print(f"File '{video}' does not exist.")
-
