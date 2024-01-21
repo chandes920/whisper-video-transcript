@@ -118,3 +118,22 @@ def get_video_resolution(video_path):
     cap.release()
 
     return width, height
+
+def get_video_duration(video_path):
+    try:
+        # Load the video clip
+        clip = VideoFileClip(video_path)
+
+        # Get the duration in seconds
+        duration = clip.duration
+
+        # Print or use the duration as needed
+        print(f"Video duration: {duration} seconds")
+
+        # Close the video clip
+        clip.close()
+
+        return duration
+
+    except Exception as e:
+        print(f"Error: {e}")

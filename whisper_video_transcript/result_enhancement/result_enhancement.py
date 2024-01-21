@@ -20,7 +20,7 @@ from whisper_video_transcript.result_enhancement.utils import (
     extract_mp4_clips,
     update_timestamp_enhance_result,
     drop_enhancement_original_index,
-    delete_working_files
+    delete_working_files,
 )
 
 
@@ -126,10 +126,11 @@ class ResultEnhancement:
 
             enhanced_dict = self._generic_workflow(video, index_dict, output)
 
-            final_result_df['duration'] = final_result_df['end']  - final_result_df['start']
-            final_result_df_longer_than_duration = final_result_df[final_result_df['duration'] >= duration_threshold]
+            new_final_results_df = enhanced_dict[video]
+            new_final_results_df['duration'] = new_final_results_df['end']  - new_final_results_df['start']
+            new_final_result_df_longer_than_duration = new_final_results_df[new_final_results_df['duration'] >= duration_threshold]
 
-            print(final_result_df_longer_than_duration)
+            print(new_final_result_df_longer_than_duration)
             
             self.delete_index_dict_mp4(self.enhance_video_list)
             return enhanced_dict

@@ -21,7 +21,8 @@ from whisper_video_transcript.transcribe.utils import (
     load_pkl,
     write_pkl,
     check_starting_folder,
-    get_video_resolution
+    get_video_resolution,
+    get_video_duration
 )
 
 
@@ -104,9 +105,16 @@ class OpenAIWhisperTranscription:
                 "start": [segment.start for segment in segments],
                 "end": [segment.end for segment in segments],
                 "text": [segment.text.strip() for segment in segments],
+                "avg_logprob": [segment.avg_logprob for segment in segments],
+                "no_speech_prob": [segment.no_speech_prob for segment in segments],
+                "compression_ratio": [segment.compression_ratio for segment in segments],
             }
             # Create a DataFrame from the extracted data
             df = pd.DataFrame(data)
+
+            duration = get_video_duration(i)
+            df = df[df['end'] <= duration]
+
             print(f"Transcribe dataframe created for {i}")
 
             result_dict[i] = df
