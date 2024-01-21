@@ -32,7 +32,7 @@ class ResultEnhancement:
         self.result_df = result_df
 
     def create_index_dict_consecutive_occurrences(self, result_text = None, threshold=5):
-        index_dict = top_consecutive_occurrences(result_text if result_text else self.result_df['text'], threshold)
+        index_dict = top_consecutive_occurrences(result_text if result_text is not None else self.result_df['text'], threshold)
         return index_dict
     
     def extract_mp4_clips(self, video_file_path, index_dict):
