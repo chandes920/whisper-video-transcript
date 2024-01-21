@@ -101,6 +101,9 @@ class ResultEnhancement:
 
     def consecutive_text_workflow(self, video, consecutive_text_threshold=4, process=False, output=False):
         index_dict = self.create_index_dict_consecutive_occurrences(threshold=consecutive_text_threshold)
+        enhanced_dict = {}
+        enhanced_dict[video] = self.result_df
+
         if index_dict:
             print(video, index_dict)
             if process:
@@ -109,6 +112,13 @@ class ResultEnhancement:
                 print(video, new_index_dict)
                 self.delete_index_dict_mp4(self.enhance_video_list)
                 return enhanced_dict
+            else:
+                print("Enhancements not processed.")
+                return enhanced_dict
+                
+        else:
+            print("No consecutive texts are found.")
+            return enhanced_dict
 
     def duration_workflow(self, video, enhanced_dict, duration_threshold=10, process=False, output=False):
         final_result_df = enhanced_dict[video]
