@@ -85,21 +85,11 @@ def write_pkl(object, file_path):
         pickle.dump(object, f)
 
 def check_starting_folder(filepaths):
-    # Check if the list is not empty
-    if not filepaths:
-        print("List of file paths is empty.")
-        return False
-    
-    # Get the directory part of each file path
-    dirnames = [os.path.dirname(path) for path in filepaths]
 
     # Get the common prefix of all file paths
-    common_prefix = os.path.commonprefix(dirnames)
+    common_prefix = os.path.commonprefix(filepaths)
 
-    # Check if the common prefix ends with a directory separator (indicating a folder)
-    is_same_folder = common_prefix and common_prefix[-1] == os.path.sep
-
-    return is_same_folder, common_prefix
+    return common_prefix
 
 def get_video_resolution(video_path):
     # Open the video file

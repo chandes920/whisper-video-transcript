@@ -50,10 +50,7 @@ class OpenAIWhisperTranscription:
 
         if video_list:
             self.size = self.get_size(video_list[0])
-            is_same_folder, common_prefix = check_starting_folder(video_list)
-
-            # if not is_same_folder:
-            #     raise ValueError("Videos are not within the same folder.")
+            common_prefix = check_starting_folder(video_list)
             
             self.new_path = common_prefix
             self.video_list = video_list
