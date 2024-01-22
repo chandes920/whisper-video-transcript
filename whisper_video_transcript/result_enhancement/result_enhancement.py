@@ -24,7 +24,7 @@ from whisper_video_transcript.result_enhancement.utils import (
 )
 
 
-class ResultEnhancement:
+class ConsecutiveTextDurationEnhancement:
     def __init__(
         self,
         result_dict = None,
@@ -113,14 +113,13 @@ class ResultEnhancement:
                     new_index_dict = self.create_index_dict_consecutive_occurrences(video=video, result_text=final_result_df['text'], threshold=consecutive_text_threshold)
                     print(video, new_index_dict)
                     self.delete_index_dict_mp4(self.enhance_video_list)
-                    return self.input_dict
                 else:
                     print("Enhancements for consecutive texts not processed.")
-                    return self.input_dict
                 
             else:
                 print("No consecutive texts are found.")
-                return self.input_dict
+            
+        return self.input_dict
 
     def duration_workflow(self, duration_threshold=10, process=False, output=False):
         for video in self.input_dict:
@@ -148,13 +147,12 @@ class ResultEnhancement:
                     print(new_final_result_df_longer_than_duration)
                     
                     self.delete_index_dict_mp4(self.enhance_video_list)
-                    return self.input_dict
                 else:
                     print("Enhancements for duration not processed.")
-                    return self.input_dict
             else:
                 print(f"No durations longer than {duration_threshold} seconds are found.")
-                return self.input_dict
+
+        return self.input_dict
 
     def _generic_workflow(self, video, index_dict, output):
 
