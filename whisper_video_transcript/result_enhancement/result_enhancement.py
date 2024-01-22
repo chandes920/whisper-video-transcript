@@ -27,16 +27,17 @@ from whisper_video_transcript.result_enhancement.utils import (
 class ResultEnhancement:
     def __init__(
         self,
-        result_df
+        result_dict = None,
+        enhanced_dict = None
     ):
-        self.result_df = result_df
+        self.input_dict = result_dict if result_dict is not None else enhanced_dict
 
-    def create_index_dict_consecutive_occurrences(self, result_text = None, threshold=5):
-        index_dict = top_consecutive_occurrences(result_text if result_text is not None else self.result_df['text'], threshold)
+    def create_index_dict_consecutive_occurrences(self, video, result_text = None, threshold=5):
+        index_dict = top_consecutive_occurrences(result_text if result_text is not None else self.input_dict[video]['text'], threshold)
         return index_dict
     
-    def extract_mp4_clips(self, video_file_path, index_dict):
-        enhance_video_list = extract_mp4_clips(video_file_path, index_dict, self.result_df)
+    def extract_mp4_clips(self, video, index_dict):
+        enhance_video_list = extract_mp4_clips(video, index_dict, self.input_dict[video])
         self.enhance_video_list = enhance_video_list
         return self.enhance_video_list
     
@@ -99,69 +100,69 @@ class ResultEnhancement:
     def delete_index_dict_mp4(self, video_list):
         delete_working_files(video_list)
 
-    def consecutive_text_workflow(self, video, consecutive_text_threshold=4, process=False, output=False):
-        index_dict = self.create_index_dict_consecutive_occurrences(threshold=consecutive_text_threshold)
-        enhanced_dict = {}
-        enhanced_dict[video] = self.result_df
+    def consecutive_text_workflow(self, consecutive_text_threshold=4, process=False, output=False):
+        
+        for video in self.input_dict:
+            index_dict = self.create_index_dict_consecutive_occurrences(video, threshold=consecutive_text_threshold)
 
-        if index_dict:
-            print(video, index_dict)
-            if process:
-                enhanced_dict = self._generic_workflow(video, index_dict, output)
-                new_index_dict = self.create_index_dict_consecutive_occurrences(result_text=enhanced_dict[video]['text'], threshold=consecutive_text_threshold)
-                print(video, new_index_dict)
-                self.delete_index_dict_mp4(self.enhance_video_list)
-                return enhanced_dict
-            else:
-                print("Enhancements for consecutive texts not processed.")
-                return enhanced_dict
+            if index_dict:
+                print(video, index_dict)
+                if process:
+                    final_result_df = self._generic_workflow(video, index_dict, output)
+                    self.input_dict[video] = final_result_df
+                    new_index_dict = self.create_index_dict_consecutive_occurrences(video=video, result_text=final_result_df['text'], threshold=consecutive_text_threshold)
+                    print(video, new_index_dict)
+                    self.delete_index_dict_mp4(self.enhance_video_list)
+                    return self.input_dict
+                else:
+                    print("Enhancements for consecutive texts not processed.")
+                    return self.input_dict
                 
-        else:
-            print("No consecutive texts are found.")
-            return enhanced_dict
-
-    def duration_workflow(self, video, enhanced_dict, duration_threshold=10, process=False, output=False):
-        final_result_df = enhanced_dict[video]
-        final_result_df['duration'] = final_result_df['end']  - final_result_df['start']
-        final_result_df_longer_than_duration = final_result_df[final_result_df['duration'] >= duration_threshold]
-        print(final_result_df_longer_than_duration)
-
-        if not final_result_df_longer_than_duration.empty:
-            if process:
-                index_dict = {}
-
-                for index, row in final_result_df_longer_than_duration.iterrows():
-                    current_value = index
-                    index_dict.setdefault(current_value, {'index_range': None})
-                    index_dict[current_value]['index_range'] = [index, index]
-                    index_dict[current_value]['cleaned_key'] = f"duration_{index}"
-
-                enhanced_dict = self._generic_workflow(video, index_dict, output)
-
-                new_final_results_df = enhanced_dict[video]
-                new_final_results_df['duration'] = new_final_results_df['end']  - new_final_results_df['start']
-                new_final_result_df_longer_than_duration = new_final_results_df[new_final_results_df['duration'] >= duration_threshold]
-
-                print(new_final_result_df_longer_than_duration)
-                
-                self.delete_index_dict_mp4(self.enhance_video_list)
-                return enhanced_dict
             else:
-                print("Enhancements for duration not processed.")
-                return enhanced_dict
-        else:
-            print(f"No durations longer than {duration_threshold} seconds are found.")
-            return enhanced_dict
+                print("No consecutive texts are found.")
+                return self.input_dict
+
+    def duration_workflow(self, duration_threshold=10, process=False, output=False):
+        for video in self.input_dict:
+            final_result_df = self.input_dict[video]
+            final_result_df['duration'] = final_result_df['end']  - final_result_df['start']
+            final_result_df_longer_than_duration = final_result_df[final_result_df['duration'] >= duration_threshold]
+            print(final_result_df_longer_than_duration)
+
+            if not final_result_df_longer_than_duration.empty:
+                if process:
+                    index_dict = {}
+
+                    for index, row in final_result_df_longer_than_duration.iterrows():
+                        current_value = index
+                        index_dict.setdefault(current_value, {'index_range': None})
+                        index_dict[current_value]['index_range'] = [index, index]
+                        index_dict[current_value]['cleaned_key'] = f"duration_{index}"
+
+                    new_final_results_df = self._generic_workflow(video, index_dict, output)
+
+                    self.input_dict[video] = new_final_results_df
+                    new_final_results_df['duration'] = new_final_results_df['end']  - new_final_results_df['start']
+                    new_final_result_df_longer_than_duration = new_final_results_df[new_final_results_df['duration'] >= duration_threshold]
+
+                    print(new_final_result_df_longer_than_duration)
+                    
+                    self.delete_index_dict_mp4(self.enhance_video_list)
+                    return self.input_dict
+                else:
+                    print("Enhancements for duration not processed.")
+                    return self.input_dict
+            else:
+                print(f"No durations longer than {duration_threshold} seconds are found.")
+                return self.input_dict
 
     def _generic_workflow(self, video, index_dict, output):
-        enhanced_dict = {}
 
         enhance_video_list = self.extract_mp4_clips(video, index_dict)
         whisper_transcription_enhance = self.init_whisper_transcription(enhance_video_list)
         enhance_result_dict = self.enhance_transcribe_to_df(whisper_transcription_enhance)
-        final_result_df = self.create_final_result_dict(enhance_result_dict, index_dict, self.result_df)
-        enhanced_dict[video] = final_result_df
+        final_result_df = self.create_final_result_dict(enhance_result_dict, index_dict, self.input_dict[video])
         subs = self.create_enhanced_subs_dict(final_result_df)
         if output:
             self.add_enhanced_subs_to_video(whisper_transcription_enhance, video, subs)
-        return enhanced_dict
+        return final_result_df
