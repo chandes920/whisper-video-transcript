@@ -41,7 +41,7 @@ class ResultEnhancement:
         return self.enhance_video_list
     
     def init_whisper_transcription(self, video_list):
-        whisper_transcription = OpenAIWhisperTranscription(video_list=video_list)
+        whisper_transcription = OpenAIWhisperTranscription(enhance_video_list=video_list)
         return whisper_transcription
     
     def enhance_transcribe_to_df(self, whisper_transcription):
@@ -133,7 +133,7 @@ class ResultEnhancement:
                 for index, row in final_result_df_longer_than_duration.iterrows():
                     current_value = index
                     index_dict.setdefault(current_value, {'index_range': None})
-                    index_dict[current_value]['index_range'] = [index, index + 1]
+                    index_dict[current_value]['index_range'] = [index, index]
                     index_dict[current_value]['cleaned_key'] = f"duration_{index}"
 
                 enhanced_dict = self._generic_workflow(video, index_dict, output)

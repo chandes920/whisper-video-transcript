@@ -31,7 +31,7 @@ class OpenAIWhisperTranscription:
         self,
         mp4_name: str=None,
         video_list: list=None,
-        create_new_dir: bool=True
+        enhance_video_list: list=None,
     ):
         if mp4_name:
             file_name = mp4_name[:-4]
@@ -51,11 +51,20 @@ class OpenAIWhisperTranscription:
         if video_list:
             self.size = self.get_size(video_list[0])
             common_prefix = check_starting_folder(video_list)
+            for video in video_list:
+                create_working_dir(common_prefix, video)
             
             self.new_path = common_prefix
-            self.video_list = video_list
+            self.video_list = [f"{self.new_path}/{video}" for video in video_list]
             self.output_list=[f"{video[:-4]}_output.mp4" for video in self.video_list]
 
+        if enhance_video_list:
+            self.size = self.get_size(enhance_video_list[0])
+            common_prefix = check_starting_folder(enhance_video_list)
+            
+            self.new_path = common_prefix
+            self.video_list = enhance_video_list
+            self.output_list=[f"{video[:-4]}_output.mp4" for video in self.video_list]
 
     def split_mp4_to_parts(self, duration_per_split: int = 600):
         total_duration = mp4_duration(self.mp4)
