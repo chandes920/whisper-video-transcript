@@ -118,6 +118,10 @@ class ConsecutiveTextDurationEnhancement:
                 
             else:
                 print("No consecutive texts are found.")
+                if output:
+                    subs = self.create_enhanced_subs_dict(self.input_dict[video])
+                    whisper_transcription_enhance = self.init_whisper_transcription([])
+                    self.add_enhanced_subs_to_video(whisper_transcription_enhance, video, subs)
             
         return self.input_dict
 
@@ -151,6 +155,10 @@ class ConsecutiveTextDurationEnhancement:
                     print("Enhancements for duration not processed.")
             else:
                 print(f"No durations longer than {duration_threshold} seconds are found.")
+                if output:
+                    subs = self.create_enhanced_subs_dict(self.input_dict[video])
+                    whisper_transcription_enhance = self.init_whisper_transcription([video])
+                    self.add_enhanced_subs_to_video(whisper_transcription_enhance, video, subs)
 
         return self.input_dict
 

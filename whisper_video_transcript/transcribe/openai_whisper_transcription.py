@@ -51,6 +51,8 @@ class OpenAIWhisperTranscription:
         if video_list:
             self.size = self.get_size(video_list[0])
             common_prefix = check_starting_folder(video_list)
+            if common_prefix[-1] == "_":
+                common_prefix = common_prefix[:-1]
             for video in video_list:
                 create_working_dir(common_prefix, video)
             
