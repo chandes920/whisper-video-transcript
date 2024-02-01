@@ -169,13 +169,14 @@ class EnhancementWorkflow:
             final_result_df['is_numeric'] = np.where(final_result_df['is_numeric'].isna(), 0, 1)
             grouped_indices = final_result_df[final_result_df['is_numeric'] == 1].index
             consecutive_groups = np.split(grouped_indices, np.where(np.diff(grouped_indices) != 1)[0] + 1)
-            
+
             index_dict = {}
 
-            for i in consecutive_groups:
-                index_dict.setdefault(i[0], {'index_range': None})
-                index_dict[i[0]]['index_range'] = [i[0], i[-1]]
-                index_dict[i[0]]['cleaned_key'] = f"numeric_{i[0]}"
+            if list(consecutive_groups[0]):
+                for i in consecutive_groups:
+                    index_dict.setdefault(i[0], {'index_range': None})
+                    index_dict[i[0]]['index_range'] = [i[0], i[-1]]
+                    index_dict[i[0]]['cleaned_key'] = f"numeric_{i[0]}"
 
             if index_dict:
                 if process:
@@ -192,10 +193,11 @@ class EnhancementWorkflow:
 
                     new_index_dict = {}
 
-                    for i in new_consecutive_groups:
-                        new_index_dict.setdefault(i[0], {'index_range': None})
-                        new_index_dict[i[0]]['index_range'] = [i[0], i[-1]]
-                        new_index_dict[i[0]]['cleaned_key'] = f"numeric_{i[0]}"
+                    if list(new_consecutive_groups[0]):
+                        for i in new_consecutive_groups:
+                            new_index_dict.setdefault(i[0], {'index_range': None})
+                            new_index_dict[i[0]]['index_range'] = [i[0], i[-1]]
+                            new_index_dict[i[0]]['cleaned_key'] = f"numeric_{i[0]}"
 
                     print(video, new_index_dict)
                     
