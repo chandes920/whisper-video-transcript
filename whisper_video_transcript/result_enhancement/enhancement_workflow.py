@@ -7,6 +7,7 @@ os.environ["IMAGEMAGICK_BINARY"] = "/opt/homebrew/bin/convert"
 from faster_whisper import WhisperModel
 from moviepy.editor import TextClip, VideoFileClip, CompositeVideoClip
 from moviepy.video.tools.subtitles import SubtitlesClip
+import numpy as np
 import pandas as pd
 import pickle
 
@@ -24,7 +25,7 @@ from whisper_video_transcript.result_enhancement.utils import (
 )
 
 
-class ConsecutiveTextDurationEnhancement:
+class EnhancementWorkflow:
     def __init__(
         self,
         result_dict = None,
@@ -46,7 +47,7 @@ class ConsecutiveTextDurationEnhancement:
         return whisper_transcription
     
     def enhance_transcribe_to_df(self, whisper_transcription):
-        enhance_result_dict = whisper_transcription.openai_transcribe_to_df()
+        enhance_result_dict = whisper_transcription.openai_transcribe_to_df(enhance=True)
         return enhance_result_dict
 
     def create_final_result_dict(self, enhance_result_dict, index_dict, result_df):
@@ -155,6 +156,54 @@ class ConsecutiveTextDurationEnhancement:
                     print("Enhancements for duration not processed.")
             else:
                 print(f"No durations longer than {duration_threshold} seconds are found.")
+                if output:
+                    subs = self.create_enhanced_subs_dict(self.input_dict[video])
+                    whisper_transcription_enhance = self.init_whisper_transcription([video])
+                    self.add_enhanced_subs_to_video(whisper_transcription_enhance, video, subs)
+
+    def numeric_workflow(self, process=False, output=False):
+        
+        for video in self.input_dict:
+            final_result_df = self.input_dict[video]
+            final_result_df['is_numeric'] = pd.to_numeric(final_result_df['text'], errors='coerce')
+            final_result_df['is_numeric'] = np.where(final_result_df['is_numeric'].isna(), 0, 1)
+            grouped_indices = final_result_df[final_result_df['is_numeric'] == 1].index
+            consecutive_groups = np.split(grouped_indices, np.where(np.diff(grouped_indices) != 1)[0] + 1)
+            
+            index_dict = {}
+
+            for i in consecutive_groups:
+                index_dict.setdefault(i[0], {'index_range': None})
+                index_dict[i[0]]['index_range'] = [i[0], i[-1]]
+                index_dict[i[0]]['cleaned_key'] = f"numeric_{i[0]}"
+
+            if index_dict:
+                if process:
+                    print(video, index_dict)
+
+                    new_final_results_df = self._generic_workflow(video, index_dict, output)
+
+                    self.input_dict[video] = new_final_results_df
+                    
+                    new_final_results_df['is_numeric'] = pd.to_numeric(new_final_results_df['text'], errors='coerce')
+                    new_final_results_df['is_numeric'] = np.where(new_final_results_df['is_numeric'].isna(), 0, 1)
+                    new_grouped_indices = new_final_results_df[new_final_results_df['is_numeric'] == 1].index
+                    new_consecutive_groups = np.split(new_grouped_indices, np.where(np.diff(new_grouped_indices) != 1)[0] + 1)
+
+                    new_index_dict = {}
+
+                    for i in new_consecutive_groups:
+                        new_index_dict.setdefault(i[0], {'index_range': None})
+                        new_index_dict[i[0]]['index_range'] = [i[0], i[-1]]
+                        new_index_dict[i[0]]['cleaned_key'] = f"numeric_{i[0]}"
+
+                    print(video, new_index_dict)
+                    
+                    self.delete_index_dict_mp4(self.enhance_video_list)
+                else:
+                    print("Enhancements for numeric not processed.")
+            else:
+                print(f"No numeric are found.")
                 if output:
                     subs = self.create_enhanced_subs_dict(self.input_dict[video])
                     whisper_transcription_enhance = self.init_whisper_transcription([video])

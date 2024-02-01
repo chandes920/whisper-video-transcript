@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='whisper_video_transcript',
-    version='0.1',
+    version='0.1.2',
     packages=find_packages(),
     install_requires=[
         'faster-whisper==0.10.0',

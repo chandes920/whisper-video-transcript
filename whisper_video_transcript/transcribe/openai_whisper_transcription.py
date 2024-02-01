@@ -97,6 +97,7 @@ class OpenAIWhisperTranscription:
         patience: int = 2,
         vad_filter: bool = False,
         task: str = "translate",
+        enhance: bool = False
     ):
         # or run on CPU with INT8
         model = WhisperModel(model_size, device = device, compute_type = compute_type)
@@ -126,6 +127,10 @@ class OpenAIWhisperTranscription:
             print(f"Transcribe dataframe created for {i}")
 
             result_dict[i] = df
+        
+        if not enhance:
+            with open(f"{self.new_path}/result_dict.pkl", "wb") as f:
+                pickle.dump(result_dict, f)
         return result_dict
 
     def create_subs_dict(self, result_dict: dict):
