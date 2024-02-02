@@ -189,6 +189,10 @@ class OpenAIWhisperTranscription:
     def write_pkl(self, object, pkl_file_name):
         write_pkl(object, f"{self.new_path}/{pkl_file_name}.pkl")
 
+    def write_csv(self, input_dict):
+        for video in self.video_list:
+            input_dict[video].to_csv(f'{video[:-4]}.csv')
+
     def get_size(self, video_path):
         width, height = get_video_resolution(video_path)
         size = (width, height)

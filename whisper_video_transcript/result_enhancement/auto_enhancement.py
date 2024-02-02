@@ -25,7 +25,7 @@ from whisper_video_transcript.result_enhancement.utils import (
 )
 
 
-class EnhancementWorkflow:
+class AutoEnhancer:
     def __init__(
         self,
         result_dict = None,
@@ -160,6 +160,8 @@ class EnhancementWorkflow:
                     subs = self.create_enhanced_subs_dict(self.input_dict[video])
                     whisper_transcription_enhance = self.init_whisper_transcription([video])
                     self.add_enhanced_subs_to_video(whisper_transcription_enhance, video, subs)
+                    
+        return self.input_dict
 
     def numeric_workflow(self, process=False, output=False):
         
