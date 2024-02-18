@@ -167,7 +167,8 @@ class AutoEnhancer:
         
         for video in self.input_dict:
             final_result_df = self.input_dict[video]
-            final_result_df['is_numeric'] = pd.to_numeric(final_result_df['text'], errors='coerce')
+            final_result_df['text_stripped'] = final_result_df['text'].str.rstrip('.,')
+            final_result_df['is_numeric'] = pd.to_numeric(final_result_df['text_stripped'], errors='coerce')
             final_result_df['is_numeric'] = np.where(final_result_df['is_numeric'].isna(), 0, 1)
             grouped_indices = final_result_df[final_result_df['is_numeric'] == 1].index
             consecutive_groups = np.split(grouped_indices, np.where(np.diff(grouped_indices) != 1)[0] + 1)
@@ -187,8 +188,8 @@ class AutoEnhancer:
                     new_final_results_df = self._generic_workflow(video, index_dict, output)
 
                     self.input_dict[video] = new_final_results_df
-                    
-                    new_final_results_df['is_numeric'] = pd.to_numeric(new_final_results_df['text'], errors='coerce')
+                    new_final_results_df['text_stripped'] = new_final_results_df['text'].str.rstrip('.,')
+                    new_final_results_df['is_numeric'] = pd.to_numeric(new_final_results_df['text_stripped'], errors='coerce')
                     new_final_results_df['is_numeric'] = np.where(new_final_results_df['is_numeric'].isna(), 0, 1)
                     new_grouped_indices = new_final_results_df[new_final_results_df['is_numeric'] == 1].index
                     new_consecutive_groups = np.split(new_grouped_indices, np.where(np.diff(new_grouped_indices) != 1)[0] + 1)
